@@ -1,0 +1,14 @@
+output "aws_vpc_id" { value = module.aws_networking.vpc_id }
+output "aws_secondary_vpc_id" { value = module.aws_networking_secondary.vpc_id }
+output "eks_cluster_name" { value = module.eks.cluster_name }
+output "eks_cluster_endpoint" { value = module.eks.cluster_endpoint }
+output "eks_secondary_cluster_name" { value = module.eks_secondary.cluster_name }
+output "eks_secondary_cluster_endpoint" { value = module.eks_secondary.cluster_endpoint }
+output "rds_primary_endpoint" { value = module.rds.primary_endpoint }
+output "rds_replica_endpoint" { value = module.rds.replica_endpoint }
+output "rds_secondary_primary_endpoint" { value = module.rds_secondary.primary_endpoint }
+output "rds_secondary_replica_endpoint" { value = module.rds_secondary.replica_endpoint }
+output "s3_bucket_id" { value = module.s3_blob.s3_bucket_id }
+output "lambda_failover_arn" { value = module.lambda_failover.function_arn }
+output "lambda_health_check_url" { value = module.lambda_failover.health_check_url }
+output "sns_topic_arn" { value = module.lambda_failover.sns_topic_arn }

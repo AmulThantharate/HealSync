@@ -1,0 +1,11 @@
+variable "environment" { type = string }
+variable "aws_region" { type = string }
+variable "vpc_id" { type = string }
+variable "subnet_ids" { type = list(string) }
+variable "eks_cluster_name" { type = string }
+variable "rds_identifier" { type = string }
+variable "s3_bucket_name" { type = string }
+variable "route53_zone_id" { type = string }
+variable "app_domain" { type = string }
+variable "failover_cname_target" { type = string }
+variable "eks_endpoint" { type = string }

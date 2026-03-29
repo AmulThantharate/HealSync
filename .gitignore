@@ -1,0 +1,44 @@
+# Terraform
+**/.terraform/
+**/.terraform.lock.hcl
+*.tfstate
+*.tfstate.backup
+*.tfvars
+!*.tfvars.example
+tfplan
+*.tfplan
+override.tf
+*_override.tf
+linkedin_post.md
+
+# Lambda build
+lambda/*.zip
+lambda/__pycache__/
+lambda/*.pyc
+
+# Python
+app/__pycache__/
+app/**/__pycache__/
+app/*.pyc
+app/**/*.pyc
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Kubeconfig
+/tmp/kubeconfig-*
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Secrets — never commit
+*.pem
+*.key
+*.crt
+.env
+.env.*

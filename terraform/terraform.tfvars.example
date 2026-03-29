@@ -1,0 +1,33 @@
+aws_region             = "us-east-1"
+aws_secondary_region   = "ap-south-1"
+environment            = "prod"
+
+aws_vpc_cidr           = "10.0.0.0/16"
+aws_secondary_vpc_cidr = "10.2.0.0/16"
+
+db_name                = "healsync"
+db_username            = "dbadmin"
+db_password            = "CHANGE_ME_strong_password"
+rds_instance_class     = "db.r6g.xlarge"
+rds_secondary_instance_class = "db.r6g.large"
+
+s3_bucket_name         = "healsync-primary-data"
+
+route53_zone_id        = "ZXXXXXXXXXXXXXXXXX"
+app_domain             = "app.example.com"
+failover_cname_target  = "healsync-failover.example.com"
+
+eks_cluster_name       = "healsync-eks-primary"
+eks_secondary_cluster_name = "healsync-eks-secondary"
+eks_k8s_version        = "1.29"
+eks_node_type          = "m5.xlarge"
+eks_node_min           = 2
+eks_node_max           = 10
+eks_node_desired       = 3
+eks_secondary_node_type    = "m5.xlarge"
+eks_secondary_node_min     = 2
+eks_secondary_node_max     = 10
+eks_secondary_node_desired = 3
+
+app_image              = "your-registry/healsync-flask-app:latest"
+grafana_password       = "CHANGE_ME_grafana"

@@ -1,0 +1,91 @@
+version: "3.9"
+
+services:
+
+  mysql-primary:
+    image: mysql:8.0
+    container_name: healsync-mysql-primary
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: healsync
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-primary-data:/var/lib/mysql
+    command: >
+      --server-id=1
+      --log-bin=mysql-bin
+      --binlog-format=ROW
+      --binlog-row-image=FULL
+      --gtid-mode=ON
+      --enforce-gtid-consistency=ON
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-uroot", "-proot123"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  mysql-secondary:
+    image: mysql:8.0
+    container_name: healsync-mysql-secondary
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: healsync
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-secondary-data:/var/lib/mysql
+    command: >
+      --server-id=2
+      --log-bin=mysql-bin
+      --binlog-format=ROW
+      --gtid-mode=ON
+      --enforce-gtid-consistency=ON
+      --read-only=ON
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+    depends_on:
+      mysql-primary:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-uroot", "-proot123"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  flask-app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: healsync-flask-app
+    ports:
+      - "5000:5000"
+    environment:
+      FLASK_ENV: development
+      SECRET_KEY: dev-secret
+      PRIMARY_DB_HOST:   mysql-primary
+      PRIMARY_DB_PORT:   "3306"
+      PRIMARY_DB_NAME:   healsync
+      PRIMARY_DB_USER:   root
+      PRIMARY_DB_PASS:   root123
+      SECONDARY_DB_HOST: mysql-secondary
+      SECONDARY_DB_PORT: "3306"
+      SECONDARY_DB_NAME: healsync
+      SECONDARY_DB_USER: root
+      SECONDARY_DB_PASS: root123
+      ACTIVE_DB:         primary
+      CLUSTER_ROLE:      primary
+      CLUSTER_REGION:    local-docker
+    depends_on:
+      mysql-primary:
+        condition: service_healthy
+      mysql-secondary:
+        condition: service_healthy
+    volumes:
+      - ./app:/app    # hot reload in dev
+
+volumes:
+  mysql-primary-data:
+  mysql-secondary-data:

@@ -1,0 +1,120 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-secondary-pvc
+  namespace: healsync
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-secondary-config
+  namespace: healsync
+data:
+  secondary.cnf: |
+    [mysqld]
+    server-id                = 2
+    log-bin                  = mysql-bin
+    binlog-format            = ROW
+    gtid-mode                = ON
+    enforce-gtid-consistency = ON
+    read-only                = ON
+    character-set-server     = utf8mb4
+    collation-server         = utf8mb4_unicode_ci
+    max-connections          = 500
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-secondary
+  namespace: healsync
+  labels:
+    app: mysql-secondary
+    role: secondary
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql-secondary
+  template:
+    metadata:
+      labels:
+        app: mysql-secondary
+        role: secondary
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: role
+                    operator: In
+                    values: ["primary", "secondary"]
+              topologyKey: kubernetes.io/hostname
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: root-password
+            - name: MYSQL_DATABASE
+              value: healsync
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/mysql
+            - name: config
+              mountPath: /etc/mysql/conf.d
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - mysqladmin ping -uroot -p"$MYSQL_ROOT_PASSWORD"
+            initialDelaySeconds: 20
+            periodSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - mysqladmin ping -uroot -p"$MYSQL_ROOT_PASSWORD"
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 300m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: mysql-secondary-pvc
+        - name: config
+          configMap:
+            name: mysql-secondary-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-secondary
+  namespace: healsync
+spec:
+  selector:
+    app: mysql-secondary
+  ports:
+    - port: 3306
+      targetPort: 3306
+  type: ClusterIP
