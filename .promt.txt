@@ -1,0 +1,36 @@
+Build a ChatOps bot for HealSync — a disaster recovery system with a Flask API (health checks, 
+        failover/failback, replication status, and todo writes). The bot should integrate with Slack using the Bolt 
+        framework (Python) and expose slash commands that map to HealSync's existing API endpoints.
+      2 
+      3 Requirements:
+      4 - Project structure: add a new `chatops/` folder alongside the existing `app/`, `lambda/`, `k8s/`, 
+        `terraform/`
+      5 - Slack Bolt (Python) with slash commands:
+      6   - `/healsync status` → GET /api/status
+      7   - `/healsync replication` → GET /api/replication
+      8   - `/healsync failover` → POST /api/failover (with confirmation dialog)
+      9   - `/healsync failback` → POST /api/failback (with confirmation dialog)
+     10   - `/healsync write <text>` → POST /api/todos
+     11   - `/healsync help` → list all commands
+     12 - Rich Slack responses using Block Kit (formatted cards, status colors, emojis)
+     13 - Configurable HealSync API base URL via environment variable (`HEALSYNC_API_URL`)
+     14 - Error handling: API down, timeouts, unauthorized access, invalid commands
+     15 - Dockerfile for the bot
+     16 - Kubernetes manifest (deployment + configmap) to run alongside HealSync
+     17 - README with setup steps (Slack app creation, env vars, deploy commands)
+     18 
+     19 Constraints:
+     20 - Follow the existing project style (Flask-based, Docker, K8s manifests)
+     21 - Keep it production-ready but testable locally
+     22 - No hardcoded secrets — use env vars / K8s secrets
+     23 - Match the tone and structure of existing files (e.g., COMMANDS_ALL_IN_ONE.md pattern)
+     24 
+     25 Deliverables:
+     26 1. chatops/bot.py (Slack Bolt app)
+     27 2. chatops/requirements.txt
+     28 3. chatops/Dockerfile
+     29 4. chatops/config.py
+     30 5. k8s/chatops-deployment.yaml + configmap
+     31 6. chatops/README.md with setup & deploy instructions
+     32 7. Update root COMMANDS_ALL_IN_ONE.md with chatops run commands
+
